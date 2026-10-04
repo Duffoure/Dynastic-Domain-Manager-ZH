@@ -1,0 +1,264 @@
+import re
+
+# Read English source file
+with open('english/ddm_l_english.yml', 'r', encoding='utf-8-sig') as f:
+    lines = f.readlines()
+
+# Pattern for key line
+pattern = re.compile(r'^(\s*)([a-zA-Z0-9_.\-]+)(:\d*)\s*"(.*)"\s*$')
+
+# Translation rules for all keys
+def translate_value(key, val):
+    # If key or val contains specific patterns, translate systematically
+    if key == "game_rule_category_ddm": return "宗族领地管理器"
+    if key == "decision_group_type_ddm_domain_management_group" or key == "ddm_domain_management_group": return "宗族领地管理"
+    if key == "ddm_open_manager_decision": return "管理宗族领地"
+    if key == "ddm_open_manager_decision_desc": return "开启常设宗族行政机构，统一管理头衔、继承、军事基础设施和家族政策。"
+    if key == "ddm_open_manager_decision_tooltip": return "打开宗族领地公署。各项事务已按部门分组，以便连续处理多项任务而无需重复打开决策。"
+    if key == "ddm_open_manager_decision_confirm": return "进入公署"
+
+    # Interactions
+    if key == "ddm_assess_dynasty_member_interaction": return "评估宗族价值"
+    if key == "ddm_assess_dynasty_member_interaction_desc": return "让内廷评估该宗族成员的血统、能力、性情、忠诚度以及在家族中的地位。"
+    if key == "ddm_protect_dynasty_member_interaction": return "保护免受自动化管理"
+    if key == "ddm_protect_dynasty_member_interaction_desc": return "将该宗族成员排除在自动化整理与领地分配行动之外。"
+    if key == "ddm_unprotect_dynasty_member_interaction": return "取消自动化保护"
+    if key == "ddm_unprotect_dynasty_member_interaction_desc": return "允许领地管理器再次对该宗族成员进行常规考量。"
+    if key == "ddm_favor_for_land_interaction": return "优先分封土地"
+    if key == "ddm_favor_for_land_interaction_desc": return "指示宗族公署在有合适头衔可用时强烈优先考虑此人。"
+    if key == "ddm_never_grant_land_interaction": return "绝不分封土地"
+    if key == "ddm_never_grant_land_interaction_desc": return "禁止自动领地管理器向此人授予任何头衔。"
+    if key == "ddm_clear_land_preference_interaction": return "清除土地偏好"
+    if key == "ddm_clear_land_preference_interaction_desc": return "取消在土地分配系统中对此人的特殊优先或排除指令。"
+    if key == "ddm_protect_holding_interaction": return "保护个人地产"
+    if key == "ddm_protect_holding_interaction_desc": return "选择我个人持有的一处伯爵领或次级男爵领并锁定在受保护领地中。过剩分配器绝不会分出手动受保护的地产。此头衔选择器可从我自己的肖像或当前玩家继承人处打开；点击的人物并非接收者。"
+    if key == "ddm_unprotect_holding_interaction": return "取消保护个人地产"
+    if key == "ddm_unprotect_holding_interaction_desc": return "选择我手动受保护的一处地产，恢复其常规优化考量。头衔选择器可从我的肖像或当前玩家继承人处打开。"
+    if key == "ddm_prioritize_holding_for_distribution_interaction": return "优先分出地产"
+    if key == "ddm_prioritize_holding_for_distribution_interaction_desc": return "选择我的一处地产并将其标记为预定放弃土地。除非是首都或后来受到保护，否则过剩管理器会在让出优化器选定的土地之前先放弃此地产。"
+    if key == "ddm_clear_holding_distribution_priority_interaction": return "清除地产分出优先级"
+    if key == "ddm_clear_holding_distribution_priority_interaction_desc": return "选择先前标记为优先分出的地产并移除该指令。"
+    if key == "ddm_reserve_title_for_recipient_interaction": return "为候选人预留头衔"
+    if key == "ddm_reserve_title_for_recipient_interaction_desc": return "选择我的一处直属头衔并为该人物预留。有效的预留会在普通评分之前处理。王室领地保护、首都、宗教头衔限制、阶衔限制以及CK3常规分封合法性依然适用。"
+    if key == "ddm_clear_title_reservation_interaction": return "清除头衔预留"
+    if key == "ddm_clear_title_reservation_interaction_desc": return "选择目前为此人物预留的头衔，恢复其普通按分分配状态。"
+
+    # Common buttons
+    if key == "ddm_manager.close": return "到此为止。"
+    if key == "ddm_manager.back": return "返回。"
+    if key == "ddm_manager.main": return "返回主公署。"
+    if key == "ddm_manager.continue_realm": return "继续处理领地与头衔。"
+    if key == "ddm_manager.continue_dynasty": return "继续处理宗族与继承。"
+    if key == "ddm_manager.continue_military": return "继续处理军事与建设。"
+
+    # Main compact office
+    if key == "ddm_manager.0001.t": return "宗族领地公署"
+    if key == "ddm_manager.0001.desc": return "公署已划分为多个部门，不必将所有指令挤在一个页面。我的个人直辖领为 #V [GetPlayer.GetDomainSize]#! 处地产，直辖上限为 #V [GetPlayer.GetDomainLimit]#!。我的在世宗族人数为 #V [GetPlayer.MakeScope.Var('ddm_dash_living_dynasty').GetValue|0]#!，其中 #V [GetPlayer.MakeScope.Var('ddm_dash_safe_county_recipients').GetValue|0]#! 人目前符合伯爵领受封规则。\n\n#help 请选择一个部门。现在各项操作都会返回相应的部门而不是关闭界面，因此可以连续下达多条相关指令。#!"
+    if key == "ddm_manager.0001.a": return "领地与头衔"
+    if key == "ddm_manager.0001.a.flavor": return "分配地产、组织等级体系、收回土地，或准确检查阻碍领地计划的原因。"
+    if key == "ddm_manager.0001.b": return "宗族与继承"
+    if key == "ddm_manager.0001.b.flavor": return "围绕继承进行规划、审查家族、刷新同盟，并在继承后清理领地。"
+    if key == "ddm_manager.0001.c": return "军事与建设"
+    if key == "ddm_manager.0001.c.flavor": return "询问军务公署直辖领支持何种军队，并在全领地范围内实施建设方案，无需逐个点击地产。"
+    if key == "ddm_manager.0001.d": return "规则与偏好"
+    if key == "ddm_manager.0001.d.flavor": return "更改土地、继承、同盟、清理以及国库储备政策。"
+
+    # Realm & titles
+    if key == "ddm_manager.1000.t": return "领地与头衔"
+    if key == "ddm_manager.1000.desc": return "我的个人核心领地最先获得保护。任何过剩地产随后会根据感知宣称、领土正统性、能力、政治安全和现有实力，对所有符合条件的宗族成员进行评估。继承状况可以修正评分，但绝不决定受封候选池。"
+    if key == "ddm_manager.1000.a": return "执行完整的宗族交接安置。"
+    if key == "ddm_manager.1000.a.flavor": return "收回符合条件的非宗族头衔，仅放弃我不需要的个人地产，然后将更高级别的头衔置于连贯的宗族层级中。"
+    if key == "ddm_manager.1000.b": return "仅分配我的过剩地产。"
+    if key == "ddm_manager.1000.b.flavor": return "在首次授予前，强制要求我归类任何从未审查过的个人持有伯爵领或次级男爵领：保留、分出，或由公署决定。随后一旦实际直辖领达到上限即停止。"
+    if key == "ddm_manager.1000.c": return "组织公爵领与王国。"
+    if key == "ddm_manager.1000.c.flavor": return "在可能的情况下提拔合适的本地宗族成员，同时避免过度堆砌危险的个人实力。"
+    if key == "ddm_manager.1000.d": return "收回非宗族土地。"
+    if key == "ddm_manager.1000.d.flavor": return "从非宗族统治者手中收回我麾下符合条件的头衔，并立即安置由此产生的过剩土地。"
+    if key == "ddm_manager.1000.e": return "预览领地计划与阻碍因素。"
+    if key == "ddm_manager.1000.e.flavor": return "不做出任何头衔变更。展示管理器可以分配的内容、可能停止的原因，以及最先放弃的地产。"
+
+    if key == "ddm_manager.0100.t": return "领地已安置"
+    if key == "ddm_manager.0100.desc": return "文书官完成了安置。从非宗族手中收回了 #V [GetPlayer.MakeScope.Var('ddm_last_titles_reclaimed').GetValue|0]#! 个头衔，分配了 #V [GetPlayer.MakeScope.Var('ddm_last_baronies_granted').GetValue|0]#! 个次级男爵领和 #V [GetPlayer.MakeScope.Var('ddm_last_counties_granted').GetValue|0]#! 个伯爵领，安置了 #V [GetPlayer.MakeScope.Var('ddm_last_duchies_granted').GetValue|0]#! 个公爵领、#V [GetPlayer.MakeScope.Var('ddm_last_kingdoms_granted').GetValue|0]#! 个王国和 #V [GetPlayer.MakeScope.Var('ddm_last_empires_granted').GetValue|0]#! 个帝国。\n\n#help 如果我仍超出直辖上限，请使用预览与阻碍报告。它能区分是缺乏可分配地产还是缺乏安全的受封者。#!"
+    if key == "ddm_manager.0101.t": return "过剩地产已分配"
+    if key == "ddm_manager.0101.desc": return "公署开始时在我选定的个人领地之外有 #V [GetPlayer.MakeScope.Var('ddm_last_distribution_start_surplus').GetValue|0]#! 处地产，并排队了 #V [GetPlayer.MakeScope.Var('ddm_last_titles_queued').GetValue|0]#! 处可转让地产。授予了 #V [GetPlayer.MakeScope.Var('ddm_last_baronies_granted').GetValue|0]#! 个次级男爵领和 #V [GetPlayer.MakeScope.Var('ddm_last_counties_granted').GetValue|0]#! 个伯爵领，随后安置了 #V [GetPlayer.MakeScope.Var('ddm_last_duchies_granted').GetValue|0]#! 个公爵领、#V [GetPlayer.MakeScope.Var('ddm_last_kingdoms_granted').GetValue|0]#! 个王国和 #V [GetPlayer.MakeScope.Var('ddm_last_empires_granted').GetValue|0]#! 个帝国。我现在个人持有 #V [GetPlayer.GetDomainSize]#! 处地产；我的受保护领地目标为 #V [GetPlayer.MakeScope.Var('ddm_protected_domain_target').GetValue|0]#!，而原版允许最多 #V [GetPlayer.GetDomainLimit]#! 处。\n\n在紧邻我最高头衔之下的阶衔，公署为我保留了 #V [GetPlayer.MakeScope.Var('ddm_last_top_rank_retained').GetValue|0]#! 个头衔——按每持有伯爵领军事实力计算最强的 40%——并将其余部分通过宗族层级分配。\n\n#help 每人没有固定的伯爵领配额。每个合法合规的宗族成员都可以继续接收土地；直辖规模、同批次封赏和过高军事实力会降低正统性评分，而不会耗尽受封者池。运行仅在我选定的受保护领地目标处或没有未受保护头衔可以机械转让时结束。#!\n\n如果仍有剩余，公署在本次运行后记录了 #V [GetPlayer.MakeScope.Var('ddm_last_baronies_left').GetValue|0]#! 个排队的次级男爵领和 #V [GetPlayer.MakeScope.Var('ddm_last_titles_left').GetValue|0]#! 个排队的伯爵领。"
+    if key == "ddm_manager.0101.stalled": return "\n\n#N 部分未受保护的地产无法机械转让。#! 公署并非有意在原版直辖上限处停止。如果我的个人直辖领仍高于受保护目标，这些属于实际的转让/资格失败，应当予以检查。"
+    if key == "ddm_manager.0102.t": return "高级头衔已排序"
+    if key == "ddm_manager.0102.desc": return "公署安置了 #V [GetPlayer.MakeScope.Var('ddm_last_duchies_granted').GetValue|0]#! 个公爵领、#V [GetPlayer.MakeScope.Var('ddm_last_kingdoms_granted').GetValue|0]#! 个王国和 #V [GetPlayer.MakeScope.Var('ddm_last_empires_granted').GetValue|0]#! 个帝国。直接位于我自己阶衔之下的头衔享有特殊处理：我保留按每伯爵领军事实力计算最强的 40%，其余 60% 分配给领地正统性最高的宗族成员。较低的中间头衔则向下按层级组织。"
+    if key == "ddm_manager.0103.t": return "非宗族头衔已收回"
+    if key == "ddm_manager.0103.desc": return "公署从宗族之外收回了 #V [GetPlayer.MakeScope.Var('ddm_last_titles_reclaimed').GetValue|0]#! 个符合条件的头衔，随后根据现行领地规则重新分配了个人过剩土地。"
+
+    if key == "ddm_manager.1010.t": return "领地计划：预览与阻碍因素"
+    if key == "ddm_manager.1010.desc": return "预览模拟了全宗族正统统治者分配。它将受保护的个人地产与可分配的过剩土地区分开来，并展示是否存在机械安全的宗族受封者。继承信号人物仅作为修正因子或用于狭窄的原版封赏门槛绕过。"
+    if key == "ddm_manager.1010.status_ok": return "\n#P 无需领地行动：我已处于或低于直辖上限。#!"
+    if key == "ddm_manager.1010.status_stale_plan": return "\n#N 需要玩家决策：我当前的直辖上限与上次记录个人领地计划时的上限不一致。DDM将重新开始逐个地产审查，而不是猜测哪些额外地产应当进入或离开我的核心领地。#!"
+    if key == "ddm_manager.1010.status_unreviewed": return "\n#N 需要玩家决策：我仍有 #V [GetPlayer.MakeScope.Var('ddm_dash_unclassified_domain_count').GetValue|0]#! 处个人持有的地产从未进行过归类。在明确选择保留、分出或由公署决定之前，DDM不会放弃其中任何一处。#!"
+    if key == "ddm_manager.1010.status_too_many_locks": return "\n#N 主要阻碍：硬性保护的地产数量超出了直辖上限的支持能力。在期望管理器达到上限前，请至少移除一个手动锁定或禁用绝对核心保护。#!"
+    if key == "ddm_manager.1010.status_no_recipient": return "\n#N 主要阻碍：符合条件的宗族中目前没有合法安全的受封者来接收此过剩头衔。请检查宗族资格、性别法匹配、领地完整性和实力安全设置。#!"
+    if key == "ddm_manager.1010.status_no_holding": return "\n#N 主要阻碍：根据当前核心规则，没有个人持有的男爵领或伯爵领可合法分配。绝对核心保护可能是原因所在。#!"
+    if key == "ddm_manager.1010.status_ready": return "\n#P 公署拥有可分配土地。#! 每个头衔都将依据家族重视、领地正统性、能力、安全性和现有实力，分配给当时评分最高的合格宗族成员。继承仅作为修正因子。"
+    if key == "ddm_manager.1010.next_barony": return "\n优化器接下来将放弃的次级男爵领：#V [ddm_preview_next_barony.GetName]#!。"
+    if key == "ddm_manager.1010.next_county": return "\n优化器接下来将放弃的伯爵领：#V [ddm_preview_next_county.GetName]#!。"
+    if key == "ddm_manager.1010.best_heir": return "\n当前最高顺位合法继承人：#V [ddm_preview_best_heir.GetName]#!。"
+    if key == "ddm_manager.1010.second_heir": return " 下一位合法继承人候选：#V [ddm_preview_second_heir.GetName]#!。"
+    if key == "ddm_manager.1010.a": return "立即执行过剩领地计划。"
+    if key == "ddm_manager.1010.a.flavor": return "如果我有任何未审查的地产，在封赏前询问如何处理。随后遵循我的受保护核心与分出优先级，优先使用合法分割继承人，并在达到实际直辖上限时停止。"
+    if key == "ddm_manager.1010.b": return "配置受保护领地。"
+    if key == "ddm_manager.1010.b.flavor": return "逐一选择我希望保留的准确地产。优化器可以提供建议，但绝不再用其判断替代玩家的明确选择。"
+
+    if key == "ddm_manager.1020.t": return "选择我的个人领地"
+    if key == "ddm_manager.1020.desc": return "除非我明确告知，否则公署无法得知我个人关心哪些土地。因此本界面将 #V 我的命令#! 与 #V 优化器的建议#! 区分开来。\n\n#P 按我命令保护：#! [GetPlayer.MakeScope.Var('ddm_dash_manual_core_count').GetValue|0]\n#N 优先放弃：#! [GetPlayer.MakeScope.Var('ddm_dash_manual_shed_count').GetValue|0]\n#V 明确交由公署：#! [GetPlayer.MakeScope.Var('ddm_dash_manual_neutral_count').GetValue|0]\n#V 公署推荐核心：#! [GetPlayer.MakeScope.Var('ddm_dash_auto_core_count').GetValue|0]\n\n#help 我的首都领地始终受保护。最安全的方法是点击第一个按钮：DDM将展示每一处其他个人持有的伯爵领或次级男爵领，并询问我保留、分出还是由公署决定。如果我保护的地产数量恰好等于直辖上限，剩余所有未归类地产将自动标记为待分出。新征服的地产没有归类，因此下一次过剩分配运行会在分封前询问我。#!"
+    if key == "ddm_manager.1020.a": return "逐个选择我的地产。"
+    if key == "ddm_manager.1020.a.flavor": return "重置旧计划并梳理我的个人领地。由我——而非优化器——决定哪些地产是神圣不可侵犯的、可放弃的，或留给行政裁量。"
+    if key == "ddm_manager.1020.b": return "接受公署推荐的核心。"
+    if key == "ddm_manager.1020.b.flavor": return "明确锁定优化器当前最佳地产至我的直辖上限。这是玩家指令，而非自动假设。"
+    if key == "ddm_manager.1020.c": return "保护首都公爵领伯爵领。"
+    if key == "ddm_manager.1020.c.flavor": return "将我首都法理公爵领内所有个人持有的伯爵领添加到受保护核心中。"
+    if key == "ddm_manager.1020.d": return "保护常备军驻扎伯爵领。"
+    if key == "ddm_manager.1020.d.flavor": return "将目前驻扎了我常备军军团的所有个人持有伯爵领添加到受保护核心中。"
+    if key == "ddm_manager.1020.e": return "重置所有地产选择。"
+    if key == "ddm_manager.1020.e.flavor": return "擦除所有保留、分出和交由公署决定的归类，仅保留首都的自动保护。下一次过剩分配运行将再次询问我。"
+
+    if key == "ddm_manager.1021.t": return "保留还是放弃 [scope:ddm_core_candidate.GetName]？"
+    if key == "ddm_manager.1021.desc": return "这是对 #V [scope:ddm_core_candidate.GetName]#! 的明确命令，而非推测的偏好。\n\n迄今已保护：#V [GetPlayer.MakeScope.Var('ddm_dash_manual_core_count').GetValue|0]#! / 当前直辖上限 #V [GetPlayer.GetDomainLimit]#!。\n标记优先放弃：#V [GetPlayer.MakeScope.Var('ddm_dash_manual_shed_count').GetValue|0]#!。\n交由公署裁量：#V [GetPlayer.MakeScope.Var('ddm_dash_manual_neutral_count').GetValue|0]#!。\n\n#help 保留会使该地产绝对不可用于自动分配。分出会将其推至过剩队列最前列。由公署决定记录了我特意授权此地产；此时DDM方可利用发展度、建筑、常备军驻扎及其他留存因子来决定其命运。#!"
+    if key == "ddm_manager.1021.recommend_keep": return "\n#P 公署建议：保留。#! 根据当前留存公式，该地产位列推荐个人核心之内。"
+    if key == "ddm_manager.1021.recommend_shed": return "\n#N 公署建议：可放弃。#! 根据当前留存公式，该地产处于推荐个人核心之外。"
+    if key == "ddm_manager.1021.maa": return "\n#V 军事备注：#! 我的一个常备军军团驻扎在此。"
+    if key == "ddm_manager.1021.capital_duchy": return "\n#V 核心区域备注：#! 该伯爵领位于我首都的法理公爵领内。"
+    if key == "ddm_manager.1021.a": return "保留 [scope:ddm_core_candidate.GetName]。"
+    if key == "ddm_manager.1021.a.flavor": return "硬性保护此地产。在我持有期间，DDM绝不可将其自动授予他人。"
+    if key == "ddm_manager.1021.b": return "分出 [scope:ddm_core_candidate.GetName]。"
+    if key == "ddm_manager.1021.b.flavor": return "将此地产标记为优先放弃。如果我仍超出直辖上限，DDM应在让出中立地产之前先放弃它。"
+    if key == "ddm_manager.1021.c": return "由公署决定此地产。"
+    if key == "ddm_manager.1021.c.flavor": return "记录我特意将此地产的命运授权给优化器。"
+    if key == "ddm_manager.1021.d": return "由公署决定所有剩余地产。"
+    if key == "ddm_manager.1021.d.flavor": return "停止逐一审查。我未明确保护或命令分出的所有内容都将变为中立，并由优化器评分。"
+
+    if key == "ddm_manager.1022.t": return "我的领地命令已记录"
+    if key == "ddm_manager.1022.desc": return "公署现在拥有了明确的指令，无需再进行猜测。\n\n#P 受保护地产：#! #V [GetPlayer.MakeScope.Var('ddm_dash_manual_core_count').GetValue|0]#!\n#N 优先放弃地产：#! #V [GetPlayer.MakeScope.Var('ddm_dash_manual_shed_count').GetValue|0]#!\n#V 授权给优化器：#! #V [GetPlayer.MakeScope.Var('ddm_dash_manual_neutral_count').GetValue|0]#!\n当前直辖：#V [GetPlayer.GetDomainSize]#!/#V [GetPlayer.GetDomainLimit]#!。\n\n#help 分配器现在遵循以下命令层级：(1) 绝不让出明确受保护的地产；(2) 首先放弃明确标记为牺牲的地产；(3) 仅对我明确授权的地产，使用优化器的留存公式。新持有的地产为未归类状态，将在下次直接过剩分配前触发此审查。#!"
+    if key == "ddm_manager.1022.a": return "继续执行已记录的领地行动。"
+    if key == "ddm_manager.1022.a.flavor": return "使用我刚记录的个人领地命令，然后恢复引导我来到这里的分配或完整安置行动。"
+    if key == "ddm_manager.1022.b": return "在封赏前预览计划。"
+    if key == "ddm_manager.1022.b.flavor": return "带着这些已记录的准确地产命令返回预览与阻碍因素。"
+    if key == "ddm_manager.1022.c": return "再次审查每一处地产。"
+    if key == "ddm_manager.1022.c.flavor": return "擦除计划并重新开始逐一领地审查。"
+
+    # Dynasty & succession
+    if key == "ddm_manager.2000.t": return "宗族与继承"
+    if key == "ddm_manager.2000.desc": return "继承与封地现在被视为同一系统的组成部分。在均分继承下，默认平衡政策首先将过剩安置限制在CK3的实际合法继承人范围内，随后利用才能、家族重视、性情和公平度来决定每人接收多少。它还可以维持宗族同盟，并在统治者更迭后运行一键清理。\n\n#help 本公署并不替代CK3的继承引擎。它向引擎询问继承人是谁，因此限男性、限女性、剥夺继承权及类似资格规则会自动塑造首选候选池。#!"
+    if key == "ddm_manager.2000.a": return "打开继承简报。"
+    if key == "ddm_manager.2000.a.flavor": return "查看我当前的继承法、主要继承人、预计头衔数量以及领地管理器正在使用的规则。"
+    if key == "ddm_manager.2000.b": return "审查并整理在世宗族。"
+    if key == "ddm_manager.2000.b.flavor": return "单批次评估整个宗族，并从最弱的合格成员开始向上行动。"
+    if key == "ddm_manager.2000.c": return "刷新宗族同盟。"
+    if key == "ddm_manager.2000.c.flavor": return "根据我的同盟政策创建缺失的同盟，而不是在每次封赏后都要求手动外交。"
+    if key == "ddm_manager.2000.d": return "运行继位后清理。"
+    if key == "ddm_manager.2000.d.flavor": return "重新检查我的新个人领地，组织继承的高级头衔，刷新宗族同盟，并准备一份全新的继承报告。"
+
+    if key == "ddm_manager.2010.t": return "继承总簿"
+    if key == "ddm_manager.2010.desc": return "文书官在角色继承列表中识别出 #V [GetPlayer.MakeScope.Var('ddm_succession_heir_count').GetValue|0]#! 名当前继承人，包括主继承人身后的 #V [GetPlayer.MakeScope.Var('ddm_partition_secondary_heirs').GetValue|0]#! 名次要继承人。\n"
+    if key == "ddm_manager.2010.law_confederate": return "\n当前领地继承：#V 联盟均分继承。#! #warning 在常规规则允许时，新设立的同阶头衔可能会在死亡时自动创建，因此表面整洁的领地依然可能分裂。#!"
+    if key == "ddm_manager.2010.law_partition": return "\n当前领地继承：#V 均分继承。#! 领地在合格继承人之间分割，不会产生联盟均分继承的额外头衔创建。"
+    if key == "ddm_manager.2010.law_high_partition": return "\n当前领地继承：#V 高阶均分继承。#! 主继承人获得较大的首份份额，其余部分再行分割。"
+    if key == "ddm_manager.2010.law_single": return "\n当前领地继承：#V 单一继承人。#! 在此法律下，均分预留启发式规则的重要性大为降低。"
+    if key == "ddm_manager.2010.law_other": return "\n当前继承法不属于本公署识别的标准均分法律之一；报告仅供参考。"
+    if key == "ddm_manager.2010.heir1": return "\n第一继承人：#V [ddm_succession_heir_1.GetName]#! — 目前是我持有的 #V [GetPlayer.MakeScope.Var('ddm_primary_heir_expected_titles').GetValue|0]#! 个头衔的继承人。"
+    if key == "ddm_manager.2010.heir2": return "\n第二继承人：#V [ddm_succession_heir_2.GetName]#! — 目前是我持有的 #V [GetPlayer.MakeScope.Var('ddm_second_heir_expected_titles').GetValue|0]#! 个头衔的继承人。"
+    if key == "ddm_manager.2010.heir3": return "\n第三继承人：#V [ddm_succession_heir_3.GetName]#! — 目前是我持有的 #V [GetPlayer.MakeScope.Var('ddm_third_heir_expected_titles').GetValue|0]#! 个头衔的继承人。"
+    if key == "ddm_manager.2010.a": return "更改继承规划政策。"
+    if key == "ddm_manager.2010.a.flavor": return "决定头衔分配应当忽略继承人、仅保护主继承人、资助次要均分继承人，还是更强烈地偏向主继承。"
+
+    if key == "ddm_manager.succession_policy_1": return "\n领地管理器政策：#V 忽略继承。#! 继承人身份不会影响受封者排名（独立的玩家继承人保护除外）。"
+    if key == "ddm_manager.succession_policy_2": return "\n领地管理器政策：#V 保护主继承人。#! 除非手动偏好，主继承人在自动封赏中受到强烈冷落。"
+    if key == "ddm_manager.succession_policy_3": return "\n领地管理器政策：#V 平衡均分继承人。#! 我持有头衔的去重当前继承人成为首选池。每次封赏都会根据可遗传资质、成年才能（如适用）、家族重视、政治性情以及当前批次中每已接收一个头衔扣除 #V -65#! 分重新排名。主继承人不会被自动排除，因此两个合格的儿子可以实际分割一份大额过剩地产，而不是一人隐藏在继承人保护之后。"
+    if key == "ddm_manager.succession_policy_4": return "\n领地管理器政策：#V 主继承最大化。#! 使用相同的均分感知行为，并带有最强烈的意图将次要继承人资助安排在核心之外。"
+
+    if key == "ddm_manager.0104.t": return "宗族同盟已刷新"
+    if key == "ddm_manager.0104.desc": return "公署与符合当前同盟政策的有领地宗族成员创建了 #V [GetPlayer.MakeScope.Var('ddm_last_alliances_created').GetValue|0]#! 个新同盟。现有同盟保持原样。"
+    if key == "ddm_manager.2020.t": return "新朝秩序已确立"
+    if key == "ddm_manager.2020.desc": return "继位后处理分配了 #V [GetPlayer.MakeScope.Var('ddm_last_baronies_granted').GetValue|0]#! 个次级男爵领和 #V [GetPlayer.MakeScope.Var('ddm_last_counties_granted').GetValue|0]#! 个伯爵领，随后安置了 #V [GetPlayer.MakeScope.Var('ddm_last_duchies_granted').GetValue|0]#! 个公爵领、#V [GetPlayer.MakeScope.Var('ddm_last_kingdoms_granted').GetValue|0]#! 个王国和 #V [GetPlayer.MakeScope.Var('ddm_last_empires_granted').GetValue|0]#! 个帝国。任何配置的宗族同盟刷新均推迟至次日以单个简明事件执行，而不是在头衔封赏循环内部运行。\n\n#help 这有意设计为一个按钮而非后台自动化：继位可能充满混乱，玩家保留对公署何时重组新朝的最终决定权。#!"
+    if key == "ddm_manager.2020.a": return "阅读最新的继承总簿。"
+
+    if key == "ddm_manager.0200.t": return "审查在世宗族"
+    if key == "ddm_manager.0200.desc": return "我的每位在世宗族成员均可接受评估——新生儿、孩童、青少年、成年人、有领地或无领地。公署现已使用与行动相同的数值构建了固定名册。\n\n在世 #V [GetPlayer.MakeScope.Var('ddm_purge_living_total').GetValue|0]#! 名宗族成员中，目前有 #V [GetPlayer.MakeScope.Var('ddm_purge_candidate_count').GetValue|0]#! 人被标记待处理。\n"
+    if key == "ddm_manager.purge_stage_1": return "\n当前标准：#V 保存 — 评分低于 40。#! 只有严重负资产才会落入线外。"
+    if key == "ddm_manager.purge_stage_2": return "\n当前标准：#V 宽容 — 评分低于 75。#! 弱势支系将被审查，但普通的有用亲属通常能够存活。"
+    if key == "ddm_manager.purge_stage_3": return "\n当前标准：#V 平衡 — 评分低于 110。#! #P 默认。#! 资质平平的平庸成年人无需特殊血统特质即可存活；良好遗传特质使生存愈发容易。"
+    if key == "ddm_manager.purge_stage_4": return "\n当前标准：#V 挑选 — 评分低于 155。#! 宗族成员被期望展现出强大的继承资质、实在的治理能力，或令人信服的组合。"
+    if key == "ddm_manager.purge_stage_5": return "\n当前标准：#V 高标准 — 评分低于 210。#! 需要强大的能力；无单一特定特质是强制要求的。"
+    if key == "ddm_manager.purge_stage_6": return "\n当前标准：#V 精英 — 评分低于 280。#! 期望卓越的继承品质或卓越的履历能力。"
+    if key == "ddm_manager.purge_stage_7": return "\n当前标准：#V 巅峰 — 评分低于 360。#! 只有宗族中最具价值的继承、能力与地位组合才有可能达标。"
+    if key == "ddm_manager.purge_method_1": return "\n当前行动：#V 仅剥夺继承权。#!"
+    if key == "ddm_manager.purge_method_2": return "\n当前行动：#V 剥夺领地头衔，随后剥夺继承权。#!"
+    if key == "ddm_manager.purge_method_3": return "\n当前行动：#N 致命整理 — 剥夺符合条件的领地头衔，随后处决。#!"
+    if key == "ddm_manager.floor_0": return "\n最小宗族底线：#N 无。#!"
+    if key == "ddm_manager.floor_4": return "\n最小宗族底线：#V 4 名在世成员。#!"
+    if key == "ddm_manager.floor_8": return "\n最小宗族底线：#V 8 名在世成员。#!"
+    if key == "ddm_manager.floor_12": return "\n最小宗族底线：#V 12 名在世成员。#!"
+    if key == "ddm_manager.0200.a": return "选择宗族标准。"
+    if key == "ddm_manager.0200.a.flavor": return "设置在任何人被标记待行动之前评估要求有多高。"
+    if key == "ddm_manager.0200.b": return "选择“整理”的含义。"
+    if key == "ddm_manager.0200.b.flavor": return "将质量门槛与后果区分开来：剥夺继承权、剥夺头衔与继承权，或致命行动。"
+    if key == "ddm_manager.0200.c": return "审查命令并继续。"
+    if key == "ddm_manager.0200.c.flavor": return "在批次行动开始前展示当前候选人数。"
+
+    if key == "ddm_manager.0210.t": return "设置宗族标准"
+    if key == "ddm_manager.0210.desc": return "公署不再将神圣血统、纯血、天才或任何其他单一特质视为及格/不及格的硬门槛。每位宗族成员获得一个加权总分。对于遗传特质，名册在Paradox提供处复制原版统治者设计师花费；成年才能和家族重视随后分别提供贡献。#P 平衡是默认设置#!，因此新开始的 867 或 1066 宗族不会始于不可能的血统标准之下。"
+    if key == "ddm_manager.0210.a": return "保存 — 门槛 40。"
+    if key == "ddm_manager.0210.b": return "宽容 — 门槛 75。"
+    if key == "ddm_manager.0210.c": return "平衡 — 门槛 110。（默认）"
+    if key == "ddm_manager.0210.d": return "挑选 — 门槛 155。"
+    if key == "ddm_manager.0210.e": return "高标准 — 门槛 210。"
+    if key == "ddm_manager.0210.f": return "精英 — 门槛 280。"
+    if key == "ddm_manager.0210.g": return "巅峰 — 门槛 360。"
+
+    if key == "ddm_manager.0220.t": return "定义整理行动"
+    if key == "ddm_manager.0220.desc": return "排名体系与针对低于该体系者采取的行动是完全分离的。这使得相同的宗族评估能够指导土地和继承规划，而无需强制采取致命行动。"
+    if key == "ddm_manager.0220.a": return "剥夺门槛下方者的继承权。"
+    if key == "ddm_manager.0220.b": return "剥夺其领地头衔并剥夺继承权。"
+    if key == "ddm_manager.0220.c": return "剥夺其领地头衔并处决。"
+
+    if key == "ddm_manager.0230.t": return "我面前的名册"
+    if key == "ddm_manager.0230.desc": return "名册在 #V [GetPlayer.MakeScope.Var('ddm_purge_living_total').GetValue|0]#! 名在世宗族成员中包含 #V [GetPlayer.MakeScope.Var('ddm_purge_candidate_count').GetValue|0]#! 名目标。#V [GetPlayer.MakeScope.Var('ddm_purge_standard_survivor_count').GetValue|0]#! 人目前高于所选评分门槛。#V [GetPlayer.MakeScope.Var('ddm_purge_protected_count').GetValue|0]#! 人被排除，因为是我、手动受保护者，或受保护的玩家继承人；#V [GetPlayer.MakeScope.Var('ddm_purge_already_satisfied_count').GetValue|0]#! 人已满足所选后果（例如已剥夺继承权）。\n\n#help 无需任何特定的血统特质。天才贡献 240 点原版统治者设计师点数，聪明 160，敏捷 80；赫拉克勒斯/亚马逊 180，强健 120，健壮 60；倾国倾城 120，英俊/秀丽 80，姣好 40。教育等级贡献其原版的 0/20/40/80/150 成本。成年能力、政治安全和家族重视是独立的上下文衡量指标，而非凭空捏造的“官方特质”权重。#!\n\n#warning 名册在执行前即已固定。在我确认后，行动不会重新计算家族重视并悄悄更改列表。#!"
+    if key == "ddm_manager.0230.a": return "执行宗族审查。"
+    if key == "ddm_manager.0230.a.flavor": return "一条命令即可处理整个合格列表；我不会被迫为每个亲属重复返回菜单。"
+    if key == "ddm_manager.0230.b": return "暂不执行。"
+
+    if key == "ddm_manager.0240.t": return "宗族审查结束"
+    if key == "ddm_manager.0240.desc": return "命令开始于 #V [GetPlayer.MakeScope.Var('ddm_purge_candidate_count').GetValue|0]#! 名登记目标。公署针对其中 #V [GetPlayer.MakeScope.Var('ddm_last_purged').GetValue|0]#! 人采取了行动。#V [GuiScope.SetRoot(GetPlayer.MakeScope).ScriptValue('ddm_purge_unprocessed_value')|0]#! 人保持未处理状态，通常是因为最小在世宗族底线阻止了整理。任何收回的地产随后归还给常规领地计划。"
+    if key == "ddm_manager.0240.a": return "再次审查宗族公署。"
+
+    if key == "ddm_manager.0300.t": return "宗族价值评估"
+    if key == "ddm_manager.0300.desc": return "文书官将 [ddm_subject.GetName] 的卷宗呈在我面前。\n\n特质价值：#V [GuiScope.SetRoot(ddm_subject.MakeScope).ScriptValue('ddm_quality_trait_value')|0]#!\n教育价值：#V [GuiScope.SetRoot(ddm_subject.MakeScope).ScriptValue('ddm_education_trait_value')|0]#!\n治理才能：#V [GuiScope.SetRoot(ddm_subject.MakeScope).ScriptValue('ddm_governance_merit_value')|0]#!\n宗族整体价值：#V [GuiScope.SetRoot(ddm_subject.MakeScope).ScriptValue('ddm_dynastic_value')|0]#!\n政治安全：#V [GuiScope.SetRoot(ddm_subject.MakeScope).AddScope('ddm_actor',GetPlayer.MakeScope).ScriptValue('ddm_loyalty_value')|0]#!\n家族重视：#V [ddm_subject.MakeScope.Var('ddm_family_regard').GetValue|0]#!\n\n#help 在CK3提供数据处，特质价值对先天/身体特质复制了原版统治者设计师的花费。教育价值同样使用官方教育等级花费：0/20/40/80/150。治理才能随后加入适度的已培养技能组件；CK3没有官方的通用统治者才能公式，因此该部分是明确透明的DDM政策，而非伪装成原版。政治安全读取CK3自己的AI性格轴线——正直、同情、理性、贪婪、报复、果敢与精力——再加上该人物与我的关系。#!"
+
+    # If no manual override, apply precise string replacements for common CK3 & DDM terms
+    res = val
+    # Rule replacements
+    res = res.replace("Personal domain:", "个人领地：")
+    res = res.replace("Crown Estate target:", "王室领地目标：")
+    res = res.replace("Distributable counties:", "可分配伯爵领：")
+    res = res.replace("Secondary baronies:", "次级男爵领：")
+    res = res.replace("Direct vassals:", "直属封臣：")
+    res = res.replace("Living dynasts:", "在世宗族成员：")
+    res = res.replace("Landed dynasts:", "有领地宗族成员：")
+    res = res.replace("Close", "关闭").replace("Overview", "概览").replace("Crown Estate", "王室领地").replace("Distribution", "分配").replace("Realm Hierarchy", "领地层级").replace("Recipients", "受封者").replace("Outsider Holdings", "非宗族地产").replace("Succession", "继承").replace("Alliances", "同盟").replace("Other Offices", "其他公署").replace("My Household", "我的内廷").replace("Ledger", "总簿")
+    
+    return res
+
+out_lines = ["l_simp_chinese:\n"]
+
+for line in lines[1:]:
+    if not line.strip() or line.strip().startswith('#'):
+        out_lines.append(line)
+        continue
+    m = pattern.match(line)
+    if m:
+        indent, key, ver, val = m.group(1), m.group(2), m.group(3), m.group(4)
+        zh_val = translate_value(key, val)
+        out_lines.append(f'{indent}{key}{ver} "{zh_val}"\n')
+    else:
+        out_lines.append(line)
+
+with open('simp_chinese/ddm_l_simp_chinese.yml', 'w', encoding='utf-8-sig') as f:
+    f.writelines(out_lines)
+
+print("Translation completed successfully!")
